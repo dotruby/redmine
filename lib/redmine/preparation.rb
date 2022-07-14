@@ -84,6 +84,7 @@ module Redmine
 
         map.project_module :time_tracking do |map|
           map.permission :view_time_entries, {:timelog => [:index, :report, :show]}, :read => true
+          map.permission :view_estimated_hours, {}, :read => true
           map.permission :log_time, {:timelog => [:new, :create]}, :require => :loggedin
           map.permission :edit_time_entries,
                          {:timelog => [:edit, :update, :destroy, :bulk_edit, :bulk_update]},

@@ -489,6 +489,26 @@ class Redmine::ApiTest::IssuesTest < Redmine::ApiTest::Base
     end
   end
 
+  test "GET /issues/:id.xml should contains total_spent_hours, and should not contains estimated_hours and total_estimated_hours when permission does not exists" do
+    parent = Issue.find(3)
+    parent.update_columns :estimated_hours => 2.0
+    child = Issue.generate!(:parent_issue_id => parent.id, :estimated_hours => 3.0)
+    TimeEntry.create!(:project => child.project, :issue => child, :user => child.author, :spent_on => child.author.today,
+                      :hours => '2.5', :comments => '', :activity_id => TimeEntryActivity.first.id)
+    # remove permission!
+    Role.anonymous.remove_permission! :view_estimated_hours
+
+    get '/issues/3.xml'
+
+    assert_equal 'application/xml', response.content_type
+    assert_select 'issue' do
+      assert_select 'estimated_hours',       false
+      assert_select 'total_estimated_hours', false
+      assert_select 'spent_hours',           parent.spent_hours.to_s
+      assert_select 'total_spent_hours',     (parent.spent_hours.to_f + 2.5).to_s
+    end
+  end
+
   test "GET /issues/:id.xml should contains visible spent_hours only" do
     user = User.find_by_login('jsmith')
     Role.find(1).update(:time_entries_visibility => 'own')
@@ -535,6 +555,25 @@ class Redmine::ApiTest::IssuesTest < Redmine::ApiTest::Base
     assert_equal (parent.estimated_hours.to_f + 3.0), json['issue']['total_estimated_hours']
     assert_nil json['issue']['spent_hours']
     assert_nil json['issue']['total_spent_hours']
+  end
+
+  test "GET /issues/:id.json should contains total_spent_hours, and should not contains estimated_hours and total_estimated_hours when permission does not exists" do
+    parent = Issue.find(3)
+    parent.update_columns :estimated_hours => 2.0
+    child = Issue.generate!(:parent_issue_id => parent.id, :estimated_hours => 3.0)
+    TimeEntry.create!(:project => child.project, :issue => child, :user => child.author, :spent_on => child.author.today,
+                      :hours => '2.5', :comments => '', :activity_id => TimeEntryActivity.first.id)
+    # remove permission!
+    Role.anonymous.remove_permission! :view_estimated_hours
+
+    get '/issues/3.json'
+
+    assert_equal 'application/json', response.content_type
+    json = ActiveSupport::JSON.decode(response.body)
+    assert_nil json['issue']['estimated_hours']
+    assert_nil json['issue']['total_estimated_hours']
+    assert_equal parent.spent_hours, json['issue']['spent_hours']
+    assert_equal (parent.spent_hours.to_f + 2.5), json['issue']['total_spent_hours']
   end
 
   test "GET /issues/:id.json should contains visible spent_hours only" do
