@@ -245,6 +245,29 @@ class JournalTest < ActiveSupport::TestCase
     assert_equal 2, visible_details.size
   end
 
+  def test_visible_details_should_have_privilege_to_view_estimated_hours
+    journal = Journal.generate! do |j|
+      j.details <<
+        JournalDetail.new(:property => 'attr', :prop_key => 'estimated_hours', :old_value => '200.00', :value => '100.00')
+    end
+    project = journal.journalized.project
+
+    user = User.find(2)
+    assert user.allowed_to?(:view_estimated_hours, project)
+    visible_details = journal.visible_details(user)
+    assert_equal 1, visible_details.size
+    detail = visible_details.first
+    assert_equal 'attr', detail.property
+    assert_equal 'estimated_hours', detail.prop_key
+    assert_equal '200.00', detail.old_value
+    assert_equal '100.00', detail.value
+
+    Role.anonymous.remove_permission!(:view_estimated_hours)
+    assert !User.anonymous.allowed_to?(:view_estimated_hours, project)
+    visible_details = journal.visible_details(User.anonymous)
+    assert_equal 0, visible_details.size
+  end
+
   def test_attachments
     journal = Journal.new
     [0, 1].map{ |i| Attachment.generate!(:file => mock_file_with_options(:original_filename => "image#{i}.png")) }.each do |attachment|

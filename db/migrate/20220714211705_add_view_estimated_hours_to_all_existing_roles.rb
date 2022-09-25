@@ -4,6 +4,6 @@ class AddViewEstimatedHoursToAllExistingRoles < ActiveRecord::Migration[6.1]
   end
 
   def down
-    # nothing to revert
+    Role.all.each { |role| role.remove_permission! :view_estimated_hours }
   end
 end
