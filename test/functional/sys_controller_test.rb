@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class SysControllerTest < Redmine::ControllerTest
   fixtures :projects, :repositories, :enabled_modules
@@ -142,5 +142,12 @@ class SysControllerTest < Redmine::ControllerTest
       assert_response 403
       assert_include 'Access denied', response.body
     end
+  end
+
+  def test_should_skip_verify_authenticity_token
+    ActionController::Base.allow_forgery_protection = true
+    assert_nothing_raised {test_create_project_repository}
+  ensure
+    ActionController::Base.allow_forgery_protection = false
   end
 end

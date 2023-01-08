@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../../../test_helper', __FILE__)
+require_relative '../../../test_helper'
 
 class Redmine::PluginTest < ActiveSupport::TestCase
   def setup
@@ -196,6 +196,13 @@ class Redmine::PluginTest < ActiveSupport::TestCase
     end
   end
 
+  def test_default_settings
+    @klass.register(:foo_plugin) {settings :default => {'key1' => 'abc', :key2 => 123}}
+    h = Setting.plugin_foo_plugin
+    assert_equal 'abc', h['key1']
+    assert_equal 123, h[:key2]
+  end
+
   def test_settings_warns_about_possible_partial_collision
     @klass.register(:foo_plugin) {settings :partial => 'foo/settings'}
     Rails.logger.expects(:warn)
@@ -209,5 +216,18 @@ class Redmine::PluginTest < ActiveSupport::TestCase
     end
 
     assert Redmine::Plugin.migrate('foo_plugin')
+  end
+
+  def test_migration_context_should_override_current_version
+    plugin = @klass.register :foo_plugin do
+      name 'Foo plugin'
+      version '0.0.1'
+    end
+    migration_dir = File.join(@klass.directory, 'db', 'migrate')
+
+    Redmine::Plugin::Migrator.current_plugin = plugin
+    context = Redmine::Plugin::MigrationContext.new(migration_dir, ::ActiveRecord::Base.connection.schema_migration)
+    # current_version should be zero because Foo plugin has no migration
+    assert_equal 0, context.current_version
   end
 end

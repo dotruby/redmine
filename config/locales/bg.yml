@@ -137,6 +137,7 @@ bg:
         must_contain_lowercase: "трябва да съдържа малки букви (a-z)"
         must_contain_digits: "трябва да съдържа цифри (0-9)"
         must_contain_special_chars: "трябва да съдържа специални символи (!, $, %, ...)"
+        domain_not_allowed: "contains a domain not allowed (%{domain})"
 
   actionview_instancetag_blank_option: Изберете
 
@@ -329,6 +330,7 @@ bg:
   field_language: Език
   field_effective_date: Дата
   field_password: Парола
+  field_current_password: Текуща парола
   field_new_password: Нова парола
   field_password_confirmation: Потвърждение
   field_twofa_scheme: Схема за двуфакторна автентикация
@@ -417,6 +419,7 @@ bg:
   field_twofa_required: Изискване за двуфакторна автентикация
   field_default_issue_query: Заявка по подразбиране
   field_default_project_query: Заявка по подразбиране за проекта
+  field_default_time_entry_activity: Дейност по подразбиране за изразходвано време
 
   setting_app_title: Заглавие
   setting_welcome_text: Допълнителен текст
@@ -838,10 +841,6 @@ bg:
   label_view_all_revisions: Разглеждане на всички ревизии
   label_x_revisions: "%{count} ревизии"
   label_max_size: Максимална големина
-  label_sort_highest: Премести най-горе
-  label_sort_higher: Премести по-горе
-  label_sort_lower: Премести по-долу
-  label_sort_lowest: Премести най-долу
   label_roadmap: Пътна карта
   label_roadmap_due_in: "Излиза след %{value}"
   label_roadmap_overdue: "%{value} закъснение"
@@ -1111,6 +1110,7 @@ bg:
     for_all_projects: За всички проекти
     for_current_project: За този проект
     for_all_users: За всички потребители
+    for_this_user: For this user
   label_nothing_to_preview: Няма нищо за предварителен преглед
   label_inherited_from_parent_project: Наследени от родителския проект
   label_inherited_from_group: Наследени от група %{name}
@@ -1131,6 +1131,8 @@ bg:
   label_my_bookmarks: Моите отметки
   label_assign_to_me: Назначи на мен
   label_default_query: Заявка по подразбиране
+  label_edited: Редактирано
+  label_time_by_author: "%{time} от %{author}"
 
   button_login: Вход
   button_submit: Изпращане
@@ -1361,6 +1363,7 @@ bg:
   text_project_is_public_anonymous: Публичните проекти са достъпни и тяхното съдържание е видимо без ограничения в мрежата.
   label_import_time_entries: Импортиране на записи за използвано време
   label_import_users: Импортиране на потребители
+  sudo_mode_new_info_html: "<strong>Какво се случва?</strong> Трябва да потвърдите вашата парола преди да предприемете административни действия. Това осигурява вашият акаунт."
 
   twofa__totp__name: Authenticator app
   twofa__totp__text_pairing_info_html: Сканирайте този QR код или въведете текстовия ключ
@@ -1414,7 +1417,8 @@ bg:
     Това действие не може да бъде отменено. Често заключването на потребителя е по-добро решение от изтриването му.
     За да потвърдите, въведете името (%{login}) по-долу.
   text_project_destroy_enter_identifier: За да потвърдите действието, въведете идентификатора на проекта (%{identifier}) по-долу.
-  field_current_password: Current password
-  sudo_mode_new_info_html: "<strong>What's happening?</strong> You need to reconfirm
-    your password before taking any administrative actions, this ensures your account
-    stays protected."
+  field_is_member_of_group: Member of group
+  text_users_bulk_destroy_head: You are about to delete the following users and remove
+    all references to them. This cannot be undone. Often, locking users instead of deleting
+    them is the better solution.
+  text_users_bulk_destroy_confirm: To confirm, please enter "%{yes}" below.

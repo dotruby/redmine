@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -72,7 +72,6 @@ module Redmine
           map.permission :view_private_notes, {}, :read => true, :require => :member
           map.permission :set_notes_private, {}, :require => :member
           map.permission :delete_issues, {:issues => :destroy}, :require => :member
-          map.permission :mention_users, {}
           # Watchers
           map.permission :view_issue_watchers, {}, :read => true
           map.permission :add_issue_watchers, {:watchers => [:new, :create, :append, :autocomplete_for_user, :autocomplete_for_mention]}
@@ -170,7 +169,7 @@ module Redmine
                   :caption => :label_project_plural
         menu.push :administration, {:controller => 'admin', :action => 'index'},
                   :if => Proc.new {User.current.admin?}, :last => true
-        menu.push :help, Info.help_url, :last => true
+        menu.push :help, Info.help_url, :html => {:target => '_blank', :rel => 'noopener'}, :last => true
       end
 
       MenuManager.map :account_menu do |menu|
@@ -368,7 +367,7 @@ module Redmine
         menu.push :repository,
                   {:controller => 'repositories', :action => 'show',
                    :repository_id => nil, :path => nil, :rev => nil},
-                  :if => Proc.new {|p| p.repository && !p.repository.new_record?}
+                  :if => Proc.new {|p| p.repositories.any? {|r| !r.new_record?}}
         menu.push :settings, {:controller => 'projects', :action => 'settings'},
                   :last => true
       end
@@ -396,7 +395,7 @@ module Redmine
 
       WikiFormatting.map do |format|
         format.register :textile
-        format.register :markdown if Object.const_defined?(:Redcarpet)
+        format.register :markdown, label: 'Markdown (deprecated)' if Object.const_defined?(:Redcarpet)
         if Object.const_defined?(:CommonMarker)
           format.register :common_mark, label: 'CommonMark Markdown (GitHub Flavored)'
         end

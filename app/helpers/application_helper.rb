@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -60,7 +60,7 @@ module ApplicationHelper
     case principal
     when User
       name = h(principal.name(options[:format]))
-      name = "@" + name if options[:mention]
+      name = "@".html_safe + name if options[:mention]
       css_classes = ''
       if principal.active? || (User.current.admin? && principal.logged?)
         url = user_url(principal, :only_path => only_path)
@@ -319,10 +319,11 @@ module ApplicationHelper
 
   def thumbnail_tag(attachment)
     thumbnail_size = Setting.thumbnails_size.to_i
+    thumbnail_path = thumbnail_path(attachment, :size => thumbnail_size * 2)
     link_to(
       image_tag(
-        thumbnail_path(attachment),
-        :srcset => "#{thumbnail_path(attachment, :size => thumbnail_size * 2)} 2x",
+        thumbnail_path,
+        :srcset => "#{thumbnail_path} 2x",
         :style => "max-width: #{thumbnail_size}px; max-height: #{thumbnail_size}px;",
         :loading => "lazy"
       ),
@@ -335,7 +336,7 @@ module ApplicationHelper
 
   def toggle_link(name, id, options={})
     onclick = +"$('##{id}').toggle(); "
-    onclick << (options[:focus] ? "$('##{options[:focus]}').focus(); " : "this.blur(); ")
+    onclick << (options[:focus] ? "$('##{options[:focus]}:visible').focus(); " : "this.blur(); ")
     onclick << "$(window).scrollTop($('##{options[:focus]}').position().top); " if options[:scroll]
     onclick << "return false;"
     link_to(name, "#", :onclick => onclick)
@@ -693,6 +694,8 @@ module ApplicationHelper
   end
 
   def time_tag(time)
+    return if time.nil?
+
     text = distance_of_time_in_words(Time.now, time)
     if @project
       link_to(text,
@@ -875,9 +878,9 @@ module ApplicationHelper
     @current_section = 0 if options[:edit_section_links]
 
     parse_sections(text, project, obj, attr, only_path, options)
-    text = parse_non_pre_blocks(text, obj, macros, options) do |text|
+    text = parse_non_pre_blocks(text, obj, macros, options) do |txt|
       [:parse_inline_attachments, :parse_hires_images, :parse_wiki_links, :parse_redmine_links].each do |method_name|
-        send method_name, text, project, obj, attr, only_path, options
+        send method_name, txt, project, obj, attr, only_path, options
       end
     end
     parse_headings(text, project, obj, attr, only_path, options)
@@ -1727,7 +1730,7 @@ module ApplicationHelper
   # Returns the javascript tags that are included in the html layout head
   def javascript_heads
     tags = javascript_include_tag(
-      'jquery-3.6.0-ui-1.13.1-ujs-6.1.3.1',
+      'jquery-3.6.1-ui-1.13.2-ujs-6.1.7',
       'tribute-5.1.3.min',
       'tablesort-5.2.1.min.js',
       'tablesort-5.2.1.number.min.js',

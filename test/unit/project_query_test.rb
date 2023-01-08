@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class ProjectQueryTest < ActiveSupport::TestCase
   fixtures :projects, :users,
@@ -87,6 +87,7 @@ class ProjectQueryTest < ActiveSupport::TestCase
     user = User.find(1)
     query = ProjectQuery.find(11)
     user_query = ProjectQuery.find(12)
+    user_query.update(visibility: Query::VISIBILITY_PUBLIC)
 
     [nil, user, User.anonymous].each do |u|
       assert_nil IssueQuery.default(user: u)

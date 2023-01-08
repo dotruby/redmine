@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class RepositoriesSubversionControllerTest < Redmine::RepositoryControllerTest
   tests RepositoriesController
@@ -27,7 +27,7 @@ class RepositoriesSubversionControllerTest < Redmine::RepositoryControllerTest
            :issue_categories, :enumerations, :custom_fields, :custom_values, :trackers
 
   PRJ_ID = 3
-  NUM_REV = 13
+  NUM_REV = 14
 
   def setup
     super
@@ -121,9 +121,10 @@ class RepositoriesSubversionControllerTest < Redmine::RepositoryControllerTest
       assert_response :success
 
       assert_select 'table.entries tbody' do
-        assert_select 'tr', 5
+        assert_select 'tr', 6
         assert_select 'tr.dir td.filename a', :text => '[folder_with_brackets]'
         assert_select 'tr.dir td.filename a', :text => 'folder'
+        assert_select 'tr.file td.filename a', :text => '+.md'
         assert_select 'tr.file td.filename a', :text => '.project'
         assert_select 'tr.file td.filename a', :text => 'helloworld.c'
         assert_select 'tr.file td.filename a', :text => 'textfile.txt'

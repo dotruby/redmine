@@ -135,6 +135,7 @@ ar:
         must_contain_lowercase: "must contain lowercase letters (a-z)"
         must_contain_digits: "must contain digits (0-9)"
         must_contain_special_chars: "must contain special characters (!, $, %, ...)"
+        domain_not_allowed: "contains a domain not allowed (%{domain})"
 
   actionview_instancetag_blank_option: الرجاء التحديد
 
@@ -652,10 +653,6 @@ ar:
   label_view_revisions: عرض التنقيحات
   label_view_all_revisions: عرض كافة المراجعات
   label_max_size: الحد الأقصى للحجم
-  label_sort_highest: التحرك لأعلى مرتبة
-  label_sort_higher: تحريك لأعلى
-  label_sort_lower: تحريك لأسفل
-  label_sort_lowest: التحرك لأسفل مرتبة
   label_roadmap: خارطة الطريق
   label_roadmap_due_in: " %{value}تستحق في "
   label_roadmap_overdue: "%{value}تأخير"
@@ -1428,6 +1425,7 @@ ar:
     for_all_projects: For all projects
     for_current_project: For current project
     for_all_users: For all users
+    for_this_user: For this user
   text_allowed_queries_to_select: Public (to any users) queries only selectable
   text_all_migrations_have_been_run: All database migrations have been run
   button_save_object: Save %{object_name}
@@ -1468,3 +1466,11 @@ ar:
   sudo_mode_new_info_html: "<strong>What's happening?</strong> You need to reconfirm
     your password before taking any administrative actions, this ensures your account
     stays protected."
+  label_edited: Edited
+  label_time_by_author: "%{time} by %{author}"
+  field_default_time_entry_activity: Default spent time activity
+  field_is_member_of_group: Member of group
+  text_users_bulk_destroy_head: You are about to delete the following users and remove
+    all references to them. This cannot be undone. Often, locking users instead of deleting
+    them is the better solution.
+  text_users_bulk_destroy_confirm: To confirm, please enter "%{yes}" below.

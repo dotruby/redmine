@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class TimeEntryTest < ActiveSupport::TestCase
   include Redmine::I18n
@@ -137,6 +137,21 @@ class TimeEntryTest < ActiveSupport::TestCase
     entry = TimeEntry.new(project: project)
     assert_not_equal entry.activity_id, default_activity.id
     assert_equal entry.activity_id, project_specific_default_activity.id
+  end
+
+  def test_activity_id_should_be_set_automatically_if_there_is_only_one_activity_available
+    project = Project.find(1)
+    TimeEntry.all.destroy_all
+    TimeEntryActivity.destroy_all
+    only_one_activity = TimeEntryActivity.create!(
+      name: 'Development',
+      parent_id: nil,
+      project_id: nil,
+      is_default: false
+    )
+
+    entry = TimeEntry.new(project: project)
+    assert_equal entry.activity_id, only_one_activity.id
   end
 
   def test_should_accept_future_dates

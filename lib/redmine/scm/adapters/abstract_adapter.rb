@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -158,12 +158,18 @@ module Redmine
 
         def with_leading_slash(path)
           path ||= ''
-          (path[0, 1]!="/") ? "/#{path}" : path
+          path.start_with?('/') ? path : "/#{path}"
+        end
+
+        def with_trailing_slash(path)
+          path ||= ''
+          path.end_with?('/') ? path : "#{path}/"
         end
 
         def with_trailling_slash(path)
-          path ||= ''
-          (path[-1, 1] == "/") ? path : "#{path}/"
+          ActiveSupport::Deprecation.warn 'Redmine::Scm::Adapters::AbstractAdapter#with_trailling_slash is ' \
+           'deprecated and will be removed in Redmine 6.0. Please use #with_trailing_slash instead.'
+          with_trailing_slash(path)
         end
 
         def without_leading_slash(path)
@@ -171,9 +177,15 @@ module Redmine
           path.gsub(%r{^/+}, '')
         end
 
-        def without_trailling_slash(path)
+        def without_trailing_slash(path)
           path ||= ''
-          (path[-1, 1] == "/") ? path[0..-2] : path
+          path.end_with?('/') ? path[0..-2] : path
+        end
+
+        def without_trailling_slash(path)
+          ActiveSupport::Deprecation.warn 'Redmine::Scm::Adapters::AbstractAdapter#without_trailling_slash is ' \
+          'deprecated and will be removed in Redmine 6.0. Please use #without_trailing_slash instead.'
+          without_trailing_slash(path)
         end
 
         def valid_name?(name)

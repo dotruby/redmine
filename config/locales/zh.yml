@@ -140,6 +140,7 @@ zh:
         must_contain_lowercase: "必须包含小写字母 (a-z)"
         must_contain_digits: "必须包含数字 (0-9)"
         must_contain_special_chars: "必须包含特殊字符 (!, $, %, ...)"
+        domain_not_allowed: "contains a domain not allowed (%{domain})"
 
   actionview_instancetag_blank_option: 请选择
 
@@ -631,10 +632,6 @@ zh:
   label_view_revisions: 查看修订
   label_view_all_revisions: 查看所有修订
   label_max_size: 最大尺寸
-  label_sort_highest: 置顶
-  label_sort_higher: 上移
-  label_sort_lower: 下移
-  label_sort_lowest: 置底
   label_roadmap: 路线图
   label_roadmap_due_in: "截止日期到  %{value}"
   label_roadmap_overdue: "%{value} 延期"
@@ -1383,6 +1380,7 @@ zh:
     for_all_projects: For all projects
     for_current_project: For current project
     for_all_users: For all users
+    for_this_user: For this user
   text_allowed_queries_to_select: Public (to any users) queries only selectable
   text_all_migrations_have_been_run: All database migrations have been run
   button_save_object: Save %{object_name}
@@ -1423,3 +1421,11 @@ zh:
   sudo_mode_new_info_html: "<strong>What's happening?</strong> You need to reconfirm
     your password before taking any administrative actions, this ensures your account
     stays protected."
+  label_edited: Edited
+  label_time_by_author: "%{time} by %{author}"
+  field_default_time_entry_activity: Default spent time activity
+  field_is_member_of_group: Member of group
+  text_users_bulk_destroy_head: You are about to delete the following users and remove
+    all references to them. This cannot be undone. Often, locking users instead of deleting
+    them is the better solution.
+  text_users_bulk_destroy_confirm: To confirm, please enter "%{yes}" below.

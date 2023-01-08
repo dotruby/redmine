@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class IssuesControllerTest < Redmine::ControllerTest
   fixtures :projects,
@@ -850,6 +850,18 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_equal Setting.issue_list_default_columns.size + 2, lines[0].split(',').size
   end
 
+  def test_index_csv_filename_without_query_name_param
+    get :index, :params => {:format => 'csv'}
+    assert_response :success
+    assert_match /issues.csv/, @response.headers['Content-Disposition']
+  end
+
+  def test_index_csv_filename_with_query_name_param
+    get :index, :params => {:query_name => 'My Query Name', :format => 'csv'}
+    assert_response :success
+    assert_match /my_query_name\.csv/, @response.headers['Content-Disposition']
+  end
+
   def test_index_csv_with_project
     get(
       :index,
@@ -1180,6 +1192,20 @@ class IssuesControllerTest < Redmine::ControllerTest
     )
     assert_response :success
     assert_equal 'application/pdf', @response.media_type
+  end
+
+  def test_index_pdf_filename_without_query
+    get :index, :params => {:format => 'pdf'}
+    assert_response :success
+    assert_match /issues.pdf/, @response.headers['Content-Disposition']
+  end
+
+  def test_index_pdf_filename_with_query
+    query = IssueQuery.create!(:name => 'My Query Name', :visibility => IssueQuery::VISIBILITY_PUBLIC)
+    get :index, :params => {:query_id => query.id, :format => 'pdf'}
+
+    assert_response :success
+    assert_match /my_query_name\.pdf/, @response.headers['Content-Disposition']
   end
 
   def test_index_atom
@@ -2709,7 +2735,7 @@ class IssuesControllerTest < Redmine::ControllerTest
       end
       assert_select "li.user-10" do
         assert_select 'img.gravatar[title=?]', 'A Team'
-        assert_select 'a[href="/users/10"]', false
+        assert_select 'a[href="/groups/10"]'
         assert_select 'a[class*=delete]'
       end
     end
@@ -2739,7 +2765,7 @@ class IssuesControllerTest < Redmine::ControllerTest
     end
     assert_select 'div.thumbnails' do
       assert_select 'a[href="/attachments/16"]' do
-        assert_select 'img[src="/attachments/thumbnail/16"]'
+        assert_select 'img[src="/attachments/thumbnail/16/200"]'
       end
     end
   end
@@ -2901,6 +2927,16 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_response :success
     assert_select "#change-#{visible.id}", 1
     assert_select "#change-#{not_visible.id}", 0
+  end
+
+  def test_show_should_mark_notes_as_edited_only_for_edited_notes
+    get :show, :params => {:id => 1}
+    assert_response :success
+
+    journal = Journal.find(1)
+    journal_title = l(:label_time_by_author, :time => format_time(journal.updated_on), :author => journal.updated_by)
+    assert_select "#change-1 h4 span.update-info[title=?]", journal_title, :text => '· Edited'
+    assert_select "#change-2 h4 span.update-info", 0
   end
 
   def test_show_atom
@@ -5636,6 +5672,26 @@ class IssuesControllerTest < Redmine::ControllerTest
     get(:edit, :params => {:id => 1})
     assert_response :success
     assert_select 'select[name=?]', 'issue[project_id]', 0
+  end
+
+  def test_new_should_hide_project_if_user_is_not_allowed_to_change_project_in_hierarchy_projects
+    WorkflowPermission.create!(:role_id => 1, :tracker_id => 1, :old_status_id => 1,
+                               :field_name => 'project_id', :rule => 'readonly')
+
+    @request.session[:user_id] = 2
+    get(:new, :params => { :tracker_id => 1, :project_id => 1 })
+    assert_response :success
+    assert_select 'select[name=?]', 'issue[project_id]', 0
+  end
+
+  def test_new_should_show_project_if_user_is_not_allowed_to_change_project_global_new_issue
+    WorkflowPermission.create!(:role_id => 1, :tracker_id => 1, :old_status_id => 1,
+                               :field_name => 'project_id', :rule => 'readonly')
+
+    @request.session[:user_id] = 2
+    get(:new, :params => { :tracker_id => 1})
+    assert_response :success
+    assert_select 'select[name=?]', 'issue[project_id]'
   end
 
   def test_edit_should_not_hide_project_when_user_changes_the_project_even_if_project_is_readonly_on_target_project
@@ -8410,6 +8466,22 @@ class IssuesControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_show_with_thumbnail_macro_should_be_able_to_fetch_image_of_different_journal
+    @request.session[:user_id] = 1
+    issue = Issue.find(2)
+    attachment = Attachment.generate!(filename: 'foo.png', digest: Redmine::Utils.random_hex(32))
+    attachment.update(container: issue)
+
+    issue.init_journal(User.first, "{{thumbnail(#{attachment.filename})}}")
+    issue.save!
+    issue.reload
+
+    get :show, params: { id: issue.id }
+    assert_select "div#history div#journal-#{issue.journals.last.id}-notes" do
+      assert_select "a.thumbnail[title=?][href='/attachments/#{attachment.id}']", 'foo.png'
+    end
+  end
+
   def test_index_should_retrieve_default_query
     query = IssueQuery.find(4)
     IssueQuery.stubs(:default).returns query
@@ -8480,5 +8552,56 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert results = JSON.parse(@response.body)['issues']
     # query filters for tracker_id == 3
     assert results.detect{ |i| i['tracker_id'] != 3 }
+  end
+
+  def test_index_should_ignore_user_default_query_if_it_is_invisible
+    query = IssueQuery.find(4)
+
+    query.update(visibility: Query::VISIBILITY_PRIVATE, user_id: 2)
+    query.save!
+
+    # If visible default query
+    @request.session[:user_id] = 2
+    @request.session[:issue_query] = nil
+    User.find(2).pref.update(default_issue_query: query.id)
+    get :index
+    assert_select 'h2', text: query.name
+
+    # If invisible default query
+    @request.session[:user_id] = 3
+    @request.session[:issue_query] = nil
+    User.find(3).pref.update(default_issue_query: query.id)
+    get :index
+    assert_select 'h2', text: 'Issues'
+  end
+
+  def test_index_should_ignore_project_default_query_if_it_is_not_public
+    query = IssueQuery.find(1)
+    query.project.update(default_issue_query: query)
+
+    query.update(visibility: Query::VISIBILITY_PRIVATE, user_id: 2)
+    query.save!
+
+    [User.find(1), User.find(2)].each do |user|
+      @request.session[:user_id] = user.id
+      @request.session[:issue_query] = nil
+      get :index, params: { project_id: query.project.id }
+      assert_select 'h2', text: 'Issues'
+    end
+  end
+
+  def test_index_should_ignore_global_default_query_if_it_is_not_public
+    query = IssueQuery.find(1)
+    with_settings default_issue_query: query.id do
+      query.update(visibility: Query::VISIBILITY_PRIVATE, user_id: 2)
+      query.save!
+
+      [User.find(1), User.find(2)].each do |user|
+        @request.session[:user_id] = user.id
+        @request.session[:issue_query] = nil
+        get :index
+        assert_select 'h2', text: 'Issues'
+      end
+    end
   end
 end

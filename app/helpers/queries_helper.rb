@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -327,6 +327,14 @@ module QueriesHelper
         csv << columns.map {|c| csv_content(c, item)}
       end
     end
+  end
+
+  def filename_for_export(query, default_name)
+    query_name = params[:query_name].presence || query.name
+    query_name = default_name if query_name == '_' || query_name.blank?
+
+    # Convert file names using the same rules as Wiki titles
+    filename_for_content_disposition(Wiki.titleize(query_name).downcase)
   end
 
   # Retrieve query from session or build a new query

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -175,6 +175,10 @@ class QueriesController < ApplicationController
     else
       redirect_to projects_path(options)
     end
+  end
+
+  def redirect_to_user_query(options)
+    redirect_to users_path(options)
   end
 
   # Returns the Query subclass, IssueQuery by default

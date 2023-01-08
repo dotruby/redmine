@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -43,6 +43,12 @@ module Redmine
               klass,
               (scheme == "mailto" ? "email" : "external")
             ].compact.join " "
+
+            if node["target"].present? && scheme != "mailto"
+              rel = node["rel"]&.split || []
+              rel << "noopener"
+              node["rel"] = rel.join(" ")
+            end
           end
           doc
         end

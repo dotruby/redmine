@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -150,7 +150,8 @@ class QueryCustomFieldColumn < QueryColumn
   end
 
   def value_object(object)
-    if custom_field.visible_by?(object.project, User.current)
+    project = object.project if object.respond_to?(:project)
+    if custom_field.visible_by?(project, User.current)
       cv = object.custom_values.select {|v| v.custom_field_id == @cf.id}
       cv.size > 1 ? cv.sort_by {|e| e.value.to_s} : cv.first
     else
@@ -541,7 +542,7 @@ class Query < ActiveRecord::Base
       if has_filter?(field) || !filter.remote
         options[:values] = filter.values
         if options[:values] && values_for(field)
-          missing = Array(values_for(field)).select(&:present?) - options[:values].map{|v| v[1]}
+          missing = Array(values_for(field)).select(&:present?) - options[:values].pluck(1)
           if missing.any? && respond_to?(method = "find_#{field}_filter_values")
             options[:values] += send(method, missing)
           end
@@ -1064,7 +1065,7 @@ class Query < ActiveRecord::Base
   end
 
   def display_type=(type)
-    unless type || self.available_display_types.include?(type)
+    unless type && self.available_display_types.include?(type)
       type = self.available_display_types.first
     end
     options[:display_type] = type
@@ -1159,12 +1160,13 @@ class Query < ActiveRecord::Base
     if /[<>]/.match?(operator)
       where = "(#{where}) AND #{db_table}.#{db_field} <> ''"
     end
-    "#{queried_table_name}.#{customized_key} #{not_in} IN (" \
-      "SELECT #{customized_class.table_name}.id FROM #{customized_class.table_name}" \
+    "#{not_in} EXISTS (" \
+      "SELECT ct.id FROM #{customized_class.table_name} ct" \
       " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='#{customized_class}'" \
-      " AND #{db_table}.customized_id=#{customized_class.table_name}.id" \
+      " AND #{db_table}.customized_id=ct.id" \
       " AND #{db_table}.custom_field_id=#{custom_field_id}" \
-      " WHERE (#{where}) AND (#{filter[:field].visibility_by_project_condition}))"
+      " WHERE #{queried_table_name}.#{customized_key} = ct.id AND " \
+      "  (#{where}) AND (#{filter[:field].visibility_by_project_condition}))"
   end
 
   def sql_for_chained_custom_field(field, operator, value, custom_field_id, chained_custom_field_id)

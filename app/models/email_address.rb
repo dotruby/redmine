@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -143,6 +143,14 @@ class EmailAddress < ActiveRecord::Base
   end
 
   def validate_email_domain
-    errors.add(:address, :invalid) unless self.class.valid_domain?(address)
+    domain = address.partition('@').last
+    return if self.class.valid_domain?(domain)
+
+    if User.current.logged?
+      errors.add(:address, :domain_not_allowed, :domain => domain)
+    else
+      # Don't display a detailed error message for anonymous users
+      errors.add(:address, :invalid)
+    end
   end
 end

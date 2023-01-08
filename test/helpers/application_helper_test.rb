@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class ApplicationHelperTest < Redmine::HelperTest
   include ERB::Util
@@ -1411,7 +1411,7 @@ class ApplicationHelperTest < Redmine::HelperTest
       </code></pre>
     RAW
     expected = <<~EXPECTED
-      <pre><code class="ECMA_script syntaxhl" data-language=\"ECMA_script\"><span class="cm">/* Hello */</span><span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello World!</span><span class="dl">"</span><span class="p">);</span></code></pre>
+      <pre><code class="ECMA_script syntaxhl" data-language="ECMA_script"><span class="cm">/* Hello */</span><span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello World!</span><span class="dl">"</span><span class="p">);</span></code></pre>
     EXPECTED
     with_settings :text_formatting => 'textile' do
       assert_equal expected.gsub(%r{[\r\n\t]}, ''), textilizable(raw).gsub(%r{[\r\n\t]}, '')
@@ -1425,7 +1425,7 @@ class ApplicationHelperTest < Redmine::HelperTest
       </code></pre>
     RAW
     expected = <<~EXPECTED
-      <pre><code class=\"ruby syntaxhl\" data-language=\"ruby\"><span class=\"n\">x</span> <span class=\"o\">=</span> <span class=\"n\">a</span> <span class=\"o\">&amp;</span> <span class=\"n\">b</span></code></pre>
+      <pre><code class="ruby syntaxhl" data-language="ruby"><span class="n">x</span> <span class="o">=</span> <span class="n">a</span> <span class="o">&amp;</span> <span class="n">b</span></code></pre>
     EXPECTED
     with_settings :text_formatting => 'textile' do
       assert_equal expected.gsub(%r{[\r\n\t]}, ''), textilizable(raw).gsub(%r{[\r\n\t]}, '')
@@ -1841,6 +1841,16 @@ class ApplicationHelperTest < Redmine::HelperTest
     assert_equal result, link_to_principal(unknown_principal, :class => 'bar')
   end
 
+  def test_link_to_principal_should_escape_principal_name
+    user = User.generate!(firstname: "firstname<>'", lastname: 'lastname&"')
+    group = Group.generate!(lastname: "group<>'&")
+
+    assert_include "firstname&lt;&gt;&#39; lastname&amp;&quot;", link_to_principal(user)
+    assert_include "@firstname&lt;&gt;&#39; lastname&amp;&quot;", link_to_principal(user, { mention: true })
+    assert_include "group&lt;&gt;&#39;&amp;", link_to_principal(group)
+    assert_include "&lt;&gt;&#39;&amp;", link_to_principal("<>'&")
+  end
+
   def test_link_to_group_should_return_only_group_name_for_non_admin_users
     User.current = nil
     group = Group.find(10)
@@ -1886,7 +1896,7 @@ class ApplicationHelperTest < Redmine::HelperTest
     assert_select_in(
       thumbnail_tag(a),
       'a[href=?][title=?] img[src=?][loading="lazy"]',
-      "/attachments/3", "logo.gif", "/attachments/thumbnail/3")
+      "/attachments/3", "logo.gif", "/attachments/thumbnail/3/200")
   end
 
   def test_link_to_project
@@ -2201,6 +2211,22 @@ class ApplicationHelperTest < Redmine::HelperTest
     end
   end
 
+  def test_time_tag
+    user = User.find(1)
+    user.pref.update(time_zone: 'UTC')
+    User.current = user
+
+    assert_nil time_tag(nil)
+    with_locale 'en' do
+      travel_to Time.zone.parse('2022-12-30T01:00:00Z') do
+        assert_equal "<abbr title=\"12/28/2022 01:00 AM\">2 days</abbr>", time_tag(2.days.ago)
+
+        @project = Project.find(1)
+        assert_equal "<a title=\"12/28/2022 01:00 AM\" href=\"/projects/ecookbook/activity?from=2022-12-28\">2 days</a>", time_tag(2.days.ago)
+      end
+    end
+  end
+
   private
 
   def wiki_links_with_special_characters
@@ -2214,7 +2240,7 @@ class ApplicationHelperTest < Redmine::HelperTest
                   "/projects/ecookbook/wiki/A_%22quoted%22_name",
                   :class => "wiki-page new"),
       '[[le français, c\'est super]]' =>
-          link_to("le français, c\'est super",
+          link_to("le français, c'est super",
                   "/projects/ecookbook/wiki/Le_fran%C3%A7ais_c'est_super",
                   :class => "wiki-page new"),
       '[[broken < less]]' =>

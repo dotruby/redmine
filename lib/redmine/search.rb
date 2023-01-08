@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -135,7 +135,7 @@ module Redmine
       def tokens
         # extract tokens from the question
         # eg. hello "bye bye" => ["hello", "bye bye"]
-        tokens = @question.scan(%r{((\s|^)"[^"]+"(\s|$)|\S+)}).collect {|m| m.first.gsub(%r{(^\s*"\s*|\s*"\s*$)}, '')}
+        tokens = @question.scan(%r{(([[:space:]]|^)"[^"]+"([[:space:]]|$)|[[:^space:]]+)}).collect {|m| m.first.gsub(%r{(^[[:space:]]*"[[:space:]]*|[[:space:]]*"[[:space:]]*$)}, '')}
         # tokens must be at least 2 characters long
         # but for Chinese characters (Chinese HANZI/Japanese KANJI), tokens can be one character
         # no more than 5 tokens to search for

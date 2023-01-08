@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../application_system_test_case', __FILE__)
+require_relative '../application_system_test_case'
 
 class InlineAutocompleteSystemTest < ApplicationSystemTestCase
   fixtures :projects, :users, :email_addresses, :roles, :members, :member_roles,
@@ -185,5 +185,20 @@ class InlineAutocompleteSystemTest < ApplicationSystemTestCase
     within('.tribute-container') do
       assert page.has_text? "Dave Lopper"
     end
+  end
+
+  def test_inline_autocomplete_for_users_on_issues_bulk_edit_show_autocomplete
+    log_user('jsmith', 'jsmith')
+    visit '/issues/bulk_edit?ids[]=1&ids[]=2'
+
+    find('#notes').click
+    fill_in 'notes', :with => '@lopper'
+
+    within('.tribute-container') do
+      assert page.has_text? 'Dave Lopper'
+      first('li').click
+    end
+
+    assert_equal '@dlopper ', find('#notes').value
   end
 end

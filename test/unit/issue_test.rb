@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class IssueTest < ActiveSupport::TestCase
   fixtures :projects, :users, :email_addresses, :user_preferences, :members, :member_roles, :roles,
@@ -857,6 +857,28 @@ class IssueTest < ActiveSupport::TestCase
                             WorkflowTransition.where(:old_status_id => issue.status_id).
                                 map(&:new_status).uniq.sort
     assert_equal expected_statuses, issue.new_statuses_allowed_to(admin)
+  end
+
+  def test_new_statuses_allowed_to_should_only_return_transitions_of_considered_workflows
+    issue = Issue.find(9)
+
+    WorkflowTransition.delete_all
+    WorkflowTransition.create!(:role_id => 1, :tracker_id => 1, :old_status_id => 1, :new_status_id => 2)
+
+    developer = Role.find(2)
+    developer.remove_permission! :edit_issues
+    developer.remove_permission! :add_issues
+    assert !developer.consider_workflow?
+    WorkflowTransition.create!(:role_id => 2, :tracker_id => 1, :old_status_id => 1, :new_status_id => 3)
+
+    # status 3 is not displayed
+    expected_statuses = IssueStatus.where(:id => [1, 2])
+
+    admin = User.find(1)
+    assert_equal expected_statuses, issue.new_statuses_allowed_to(admin)
+
+    author = User.find(8)
+    assert_equal expected_statuses, issue.new_statuses_allowed_to(author)
   end
 
   def test_new_statuses_allowed_to_should_return_allowed_statuses_when_copying

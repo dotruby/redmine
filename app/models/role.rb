@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -60,6 +60,8 @@ class Role < ActiveRecord::Base
     where("#{compare} builtin = 0")
   end)
 
+  belongs_to :default_time_entry_activity, :class_name => 'TimeEntryActivity'
+
   before_destroy :check_deletable
   has_many :workflow_rules, :dependent => :delete_all
   has_and_belongs_to_many :custom_fields, :join_table => "#{table_name_prefix}custom_fields_roles#{table_name_suffix}", :foreign_key => "role_id"
@@ -104,7 +106,8 @@ class Role < ActiveRecord::Base
     'managed_role_ids',
     'permissions',
     'permissions_all_trackers',
-    'permissions_tracker_ids'
+    'permissions_tracker_ids',
+    'default_time_entry_activity_id'
   )
 
   # Copies attributes from another role, arg can be an id or a Role

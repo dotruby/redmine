@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class AdminControllerTest < Redmine::ControllerTest
   fixtures :projects, :users, :email_addresses, :roles
@@ -155,6 +155,10 @@ class AdminControllerTest < Redmine::ControllerTest
 
     get :plugins
     assert_response :success
+
+    assert_select 'th:nth-of-type(1)', :text => 'Name / Description'
+    assert_select 'th:nth-of-type(2)', :text => 'Author'
+    assert_select 'th:nth-of-type(3)', :text => 'Version'
 
     assert_select 'tr#plugin-foo' do
       assert_select 'td span.name', :text => 'Foo plugin'

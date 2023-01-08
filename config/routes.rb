@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -108,7 +108,11 @@ Rails.application.routes.draw do
   match 'my/twofa/backup_codes', :controller => 'twofa_backup_codes', :action => 'show', :via => [:get]
   match 'users/:user_id/twofa/deactivate', :controller => 'twofa', :action => 'admin_deactivate', :via => :post
 
+  match '/users/context_menu', to: 'context_menus#users', as: :users_context_menu, via: [:get, :post]
   resources :users do
+    collection do
+      delete 'bulk_destroy'
+    end
     resources :memberships, :controller => 'principal_memberships'
     resources :email_addresses, :only => [:index, :create, :update, :destroy]
   end
@@ -313,9 +317,11 @@ Rails.application.routes.draw do
   get 'attachments/download/:id', :to => 'attachments#download', :id => /\d+/
   get 'attachments/thumbnail/:id(/:size)', :to => 'attachments#thumbnail', :id => /\d+/, :size => /\d+/, :as => 'thumbnail'
   resources :attachments, :only => [:show, :update, :destroy]
-  get 'attachments/:object_type/:object_id/edit', :to => 'attachments#edit_all', :as => :object_attachments_edit
-  patch 'attachments/:object_type/:object_id', :to => 'attachments#update_all', :as => :object_attachments
-  get 'attachments/:object_type/:object_id/download', :to => 'attachments#download_all', :as => :object_attachments_download
+  constraints object_type: /(issues|versions|news|messages|wiki_pages|projects|documents|journals)/ do
+    get 'attachments/:object_type/:object_id/edit', :to => 'attachments#edit_all', :as => :object_attachments_edit
+    patch 'attachments/:object_type/:object_id', :to => 'attachments#update_all', :as => :object_attachments
+    get 'attachments/:object_type/:object_id/download', :to => 'attachments#download_all', :as => :object_attachments_download
+  end
 
   resources :groups do
     resources :memberships, :controller => 'principal_memberships'

@@ -157,6 +157,7 @@ ja:
         must_contain_lowercase: "は小文字 (a-z) を含む必要があります"
         must_contain_digits: "は数字 (0-9) を含む必要があります"
         must_contain_special_chars: "は記号 (!, $, %, ...) を含む必要があります"
+        domain_not_allowed: "は許可されていないドメインを含んでいます (%{domain})"
 
   actionview_instancetag_blank_option: 選んでください
 
@@ -667,10 +668,6 @@ ja:
   label_view_revisions: リビジョンを表示
   label_view_all_revisions: すべてのリビジョンを表示
   label_max_size: サイズの上限
-  label_sort_highest: 一番上へ
-  label_sort_higher: 上へ
-  label_sort_lower: 下へ
-  label_sort_lowest: 一番下へ
   label_roadmap: ロードマップ
   label_roadmap_due_in: "期日まで %{value}"
   label_roadmap_overdue: "%{value} 遅れ"
@@ -1396,6 +1393,7 @@ ja:
     for_all_projects: 全プロジェクト向け
     for_current_project: 現在のプロジェクト
     for_all_users: 全ユーザー向け
+    for_this_user: For this user
   text_allowed_queries_to_select: 公開クエリ (すべてのユーザーが表示できるクエリ) のみ選択できます
   text_all_migrations_have_been_run: すべてのデータベースマイグレーションが実行済
   text_setting_config_change: 動作はconfig/configuration.ymlで設定できます。設定後、Redmineを再起動してください。
@@ -1421,7 +1419,11 @@ ja:
     この操作は元に戻せません。
   text_projects_bulk_destroy_confirm: 削除する場合は確認のため "%{yes}" と入力してください。
   text_subprojects_bulk_destroy: '次のサブプロジェクトを含む: %{value}'
-  field_current_password: Current password
-  sudo_mode_new_info_html: "<strong>What's happening?</strong> You need to reconfirm
-    your password before taking any administrative actions, this ensures your account
-    stays protected."
+  field_current_password: 現在のパスワード
+  sudo_mode_new_info_html: "アカウントのセキュリティの維持のため、管理操作を行う前にパスワードの再確認が必要です。"
+  label_edited: 編集済み
+  label_time_by_author: "%{time} %{author}"
+  field_default_time_entry_activity: 時間管理におけるデフォルトの作業分類
+  field_is_member_of_group: グループ
+  text_users_bulk_destroy_head: 以下のユーザーとこれらのユーザーへのすべての参照を削除しようとしています。削除後は元に戻せません。通常は削除よりロックのほうが適切です。
+  text_users_bulk_destroy_confirm: 削除する場合は確認のため "%{yes}" と入力してください。

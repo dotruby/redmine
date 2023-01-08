@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -129,7 +129,7 @@ class Changeset < ActiveRecord::Base
     ref_keywords_any = ref_keywords.delete('*')
 
     # keywords used to fix issues
-    fix_keywords = Setting.commit_update_keywords_array.map {|r| r['keywords']}.flatten.compact
+    fix_keywords = Setting.commit_update_keywords_array.pluck('keywords').flatten.compact
     kw_regexp = (ref_keywords + fix_keywords).collect{|kw| Regexp.escape(kw)}.join("|")
 
     referenced_issues = []
@@ -296,7 +296,7 @@ class Changeset < ActiveRecord::Base
   class << self
     # Strips and reencodes a commit log before insertion into the database
     def normalize_comments(str, encoding)
-      Changeset.to_utf8(str.to_s.strip, encoding)
+      Changeset.to_utf8(str.to_s, encoding).strip
     end
 
     def to_utf8(str, encoding)

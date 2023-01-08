@@ -138,6 +138,7 @@ eu:
         must_contain_lowercase: "must contain lowercase letters (a-z)"
         must_contain_digits: "must contain digits (0-9)"
         must_contain_special_chars: "must contain special characters (!, $, %, ...)"
+        domain_not_allowed: "contains a domain not allowed (%{domain})"
 
   actionview_instancetag_blank_option: Hautatu mesedez
 
@@ -603,10 +604,6 @@ eu:
   label_view_revisions: Berrikuspenak ikusi
   label_view_all_revisions: Berrikuspen guztiak ikusi
   label_max_size: Tamaina maximoa
-  label_sort_highest: Goraino mugitu
-  label_sort_higher: Gora mugitu
-  label_sort_lower: Behera mugitu
-  label_sort_lowest: Beheraino mugitu
   label_roadmap: Ibilbide-mapa
   label_roadmap_due_in: "Epea: %{value}"
   label_roadmap_overdue: "%{value} berandu"
@@ -1429,6 +1426,7 @@ eu:
     for_all_projects: For all projects
     for_current_project: For current project
     for_all_users: For all users
+    for_this_user: For this user
   text_allowed_queries_to_select: Public (to any users) queries only selectable
   text_all_migrations_have_been_run: All database migrations have been run
   button_save_object: Save %{object_name}
@@ -1469,3 +1467,11 @@ eu:
   sudo_mode_new_info_html: "<strong>What's happening?</strong> You need to reconfirm
     your password before taking any administrative actions, this ensures your account
     stays protected."
+  label_edited: Edited
+  label_time_by_author: "%{time} by %{author}"
+  field_default_time_entry_activity: Default spent time activity
+  field_is_member_of_group: Member of group
+  text_users_bulk_destroy_head: You are about to delete the following users and remove
+    all references to them. This cannot be undone. Often, locking users instead of deleting
+    them is the better solution.
+  text_users_bulk_destroy_confirm: To confirm, please enter "%{yes}" below.

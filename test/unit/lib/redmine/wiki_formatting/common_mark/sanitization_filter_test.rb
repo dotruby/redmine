@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../../../../../test_helper', __FILE__)
+require_relative '../../../../../test_helper'
 
 if Object.const_defined?(:CommonMarker)
   require 'redmine/wiki_formatting/common_mark/sanitization_filter'
@@ -93,6 +93,10 @@ if Object.const_defined?(:CommonMarker)
     # samples taken from the Sanitize test suite
     # rubocop:disable Layout/LineLength
     STRINGS = [
+      [
+        '<span style="color: #333; background: url(\'https://example.com/evil.svg\')">hello</span>"',
+        '<span style="color: #333; ">hello</span>"'
+      ],
       [
         '<b>Lo<!-- comment -->rem</b> <a href="pants" title="foo" style="text-decoration: underline;">ipsum</a> <a href="http://foo.com/"><strong>dolor</strong></a> sit<br/>amet <style>.foo { color: #fff; }</style> <script>alert("hello world");</script>',
         '<b>Lorem</b> <a href="pants" title="foo">ipsum</a> <a href="http://foo.com/"><strong>dolor</strong></a> sit<br>amet .foo { color: #fff; } '

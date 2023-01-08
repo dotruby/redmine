@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -157,7 +157,7 @@ module IssuesHelper
 
   # Renders relations stats (total relations (open - closed)) with query links
   def render_relations_stats(issue, relations)
-    open_relations = relations.count{|r| (r.other_issue(issue).closed?)==false}
+    open_relations = relations.count{|r| r.other_issue(issue).closed? == false}
     closed_relations = relations.count{|r| r.other_issue(issue).closed?}
     render_issues_stats(open_relations, closed_relations, {:issue_id => relations.map{|r| r.other_issue(issue).id}.join(',')})
   end
@@ -203,7 +203,7 @@ module IssuesHelper
     s = ''.html_safe
     relations.each do |relation|
       other_issue = relation.other_issue(issue)
-      css = "issue hascontextmenu #{other_issue.css_classes}"
+      css = "issue hascontextmenu #{other_issue.css_classes} #{relation.css_classes_for(other_issue)}"
       buttons =
         if manage_relations
           link_to(
@@ -339,7 +339,7 @@ module IssuesHelper
     end
 
     def size
-      @left.size > @right.size ? @left.size : @right.size
+      [@left.size, @right.size].max
     end
 
     def to_html
@@ -764,12 +764,18 @@ module IssuesHelper
   end
 
   def projects_for_select(issue)
-    if issue.parent_issue_id.present?
-      issue.allowed_target_projects_for_subtask(User.current)
-    elsif @project && issue.new_record? && !issue.copy?
-      issue.allowed_target_projects(User.current, 'tree')
+    projects =
+      if issue.parent_issue_id.present?
+        issue.allowed_target_projects_for_subtask(User.current)
+      elsif @project && issue.new_record? && !issue.copy?
+        issue.allowed_target_projects(User.current, 'tree')
+      else
+        issue.allowed_target_projects(User.current)
+      end
+    if issue.read_only_attribute_names(User.current).include?('project_id')
+      params['project_id'].present? ? Project.where(identifier: params['project_id']) : projects
     else
-      issue.allowed_target_projects(User.current)
+      projects
     end
   end
 end

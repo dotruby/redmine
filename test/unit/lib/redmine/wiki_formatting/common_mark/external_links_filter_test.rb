@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../../../../../test_helper', __FILE__)
+require_relative '../../../../../test_helper'
 
 if Object.const_defined?(:CommonMarker)
   require 'redmine/wiki_formatting/common_mark/external_links_filter'
@@ -49,6 +49,17 @@ if Object.const_defined?(:CommonMarker)
       assert_nothing_raised do
         filter(%(<a href="http://example.com/foo#bar#">Malformed URI</a>))
       end
+    end
+
+    def test_external_links_with_target_get_rel_noopener
+      assert_equal(
+        %(<a target="_blank" href="http://example.net/" class="external" rel="noopener">link</a>),
+        filter(%(<a target="_blank" href="http://example.net/">link</a>))
+      )
+      assert_equal(
+        %(<a target="_blank" href="http://example.net/" rel="nofollow noopener" class="external">link</a>),
+        filter(%(<a target="_blank" href="http://example.net/" rel="nofollow">link</a>))
+      )
     end
   end
 end

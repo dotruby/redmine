@@ -136,6 +136,7 @@ en:
         must_contain_lowercase: "must contain lowercase letters (a-z)"
         must_contain_digits: "must contain digits (0-9)"
         must_contain_special_chars: "must contain special characters (!, $, %, ...)"
+        domain_not_allowed: "contains a domain not allowed (%{domain})"
 
   actionview_instancetag_blank_option: Please select
 
@@ -301,6 +302,7 @@ en:
   field_title: Title
   field_project: Project
   field_issue: Issue
+  field_is_member_of_group: Member of group
   field_status: Status
   field_notes: Notes
   field_is_closed: Issue closed
@@ -415,6 +417,7 @@ en:
   field_twofa_required: Require two factor authentication
   field_default_issue_query: Default issue query
   field_default_project_query: Default project query
+  field_default_time_entry_activity: Default spent time activity
 
   setting_app_title: Application title
   setting_welcome_text: Welcome text
@@ -837,10 +840,6 @@ en:
   label_view_all_revisions: View all revisions
   label_x_revisions: "%{count} revisions"
   label_max_size: Maximum size
-  label_sort_highest: Move to top
-  label_sort_higher: Move up
-  label_sort_lower: Move down
-  label_sort_lowest: Move to bottom
   label_roadmap: Roadmap
   label_roadmap_due_in: "Due in %{value}"
   label_roadmap_overdue: "%{value} late"
@@ -1110,6 +1109,7 @@ en:
     for_all_projects: For all projects
     for_current_project: For current project
     for_all_users: For all users
+    for_this_user: For this user
   label_nothing_to_preview: Nothing to preview
   label_inherited_from_parent_project: "Inherited from parent project"
   label_inherited_from_group: "Inherited from group %{name}"
@@ -1130,6 +1130,8 @@ en:
   label_my_bookmarks: My bookmarks
   label_assign_to_me: Assign to me
   label_default_query: Default query
+  label_edited: Edited
+  label_time_by_author: "%{time} by %{author}"
 
   button_login: Login
   button_submit: Submit
@@ -1225,6 +1227,8 @@ en:
   text_project_close_confirmation: Are you sure you want to close the '%{value}' project to make it read-only?
   text_project_reopen_confirmation: Are you sure you want to reopen the '%{value}' project?
   text_project_archive_confirmation: Are you sure you want to archive the '%{value}' project?
+  text_users_bulk_destroy_head: 'You are about to delete the following users and remove all references to them. This cannot be undone. Often, locking users instead of deleting them is the better solution.'
+  text_users_bulk_destroy_confirm: 'To confirm, please enter "%{yes}" below.'
   text_workflow_edit: Select a role and a tracker to edit the workflow
   text_are_you_sure: Are you sure?
   text_journal_changed: "%{label} changed from %{old} to %{new}"

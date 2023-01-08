@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 class TimelogControllerTest < Redmine::ControllerTest
   fixtures :projects, :enabled_modules, :roles, :members,
@@ -89,7 +89,20 @@ class TimelogControllerTest < Redmine::ControllerTest
     assert_response 403
   end
 
-  def test_new_should_select_default_activity
+  def test_new_should_select_default_role_activity
+    developer = Role.find(2)
+    developer.default_time_entry_activity_id = 9
+    developer.save!
+
+    @request.session[:user_id] = 3
+    get :new, :params => {:project_id => 1}
+    assert_response :success
+    assert_select 'select[name=?]', 'time_entry[activity_id]' do
+      assert_select 'option[selected=selected]', :text => 'Design'
+    end
+  end
+
+  def test_new_should_select_default_global_activity_for_user_roles_without_default_activities
     @request.session[:user_id] = 3
     get :new, :params => {:project_id => 1}
     assert_response :success
@@ -1675,6 +1688,18 @@ class TimelogControllerTest < Redmine::ControllerTest
       assert_response :success
       assert_equal 'text/csv; header=present', response.media_type
     end
+  end
+
+  def test_index_csv_filename_query_name_param
+    get :index, :params => {:format => 'csv'}
+    assert_response :success
+    assert_match /timelog.csv/, @response.headers['Content-Disposition']
+  end
+
+  def test_index_csv_filename_with_query_name_param
+    get :index, :params => {:query_name => 'My Query Name', :format => 'csv'}
+    assert_response :success
+    assert_match /my_query_name\.csv/, @response.headers['Content-Disposition']
   end
 
   def test_index_csv_should_fill_issue_column_with_tracker_id_and_subject

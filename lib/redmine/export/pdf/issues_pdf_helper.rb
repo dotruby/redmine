@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Redmine - project management software
-# Copyright (C) 2006-2022  Jean-Philippe Lang
+# Copyright (C) 2006-2023  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -61,7 +61,7 @@ module Redmine
             User.current.allowed_to?(:view_estimated_hours, issue.project) && !issue.disabled_core_fields.include?('estimated_hours')
           right << [l(:label_spent_time), l_hours(issue.total_spent_hours)] if User.current.allowed_to?(:view_time_entries, issue.project)
 
-          rows = left.size > right.size ? left.size : right.size
+          rows = [left.size, right.size].max
           left  << nil while left.size  < rows
           right << nil while right.size < rows
 
@@ -83,7 +83,7 @@ module Redmine
             border_last  = 'R'
           end
 
-          rows = left.size > right.size ? left.size : right.size
+          rows = [left.size, right.size].max
           rows.times do |i|
             heights = []
             pdf.SetFontStyle('B', 9)

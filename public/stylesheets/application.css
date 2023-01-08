@@ -45,6 +45,10 @@ pre, code {font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;}
 
 #quick-search {float:right;}
 #quick-search #q {width:130px; height:24px; box-sizing:border-box; vertical-align:middle; border:1px solid #ccc; border-radius:3px;}
+#quick-search form {float:left; margin-right:3px;}
+#quick-search form input {margin-top:0; margin-bottom:0;}
+#quick-search form label {vertical-align:middle;}
+#quick-search #project-jump {float:left;}
 
 #main-menu {position: absolute;  bottom: 0px;  left: 10px; margin-right: -500px; width: 100%;}
 #main-menu ul {margin: 0;  padding: 0; width: 100%; white-space: nowrap;}
@@ -567,9 +571,12 @@ body.controller-issues h2.inline-flex {padding-right: 0}
   overflow: hidden;
 }
 #issue_tree .issue > td.subject, #relations .issue > td.subject {
-  width: 100%; /* let subject have one full width column */
+  width: 50%;
   word-break: break-word; /* break word if subject is too long */
   padding-right: 25px; /* this is the spaces that .buttons uses next to subject */
+}
+#issue_tree .issue > td.assigned_to, #relations .issue > td.assigned_to {
+  white-space: nowrap;
 }
 #trackers_description {display:none;}
 #trackers_description dt {font-weight: bold; text-decoration: underline;}
@@ -610,6 +617,7 @@ div.journal ul.details a, ul.revision-info a {color:#70A7CD;}
 div.journal ul.details a:hover, ul.revision-info a:hover {color:#D14848;}
 body.avatars-on div.journal {padding-left:32px;}
 div.journal h4 img.gravatar {margin-left:-32px;}
+div.journal span.update-info {color: #666; font-size: 0.9em;}
 
 #history .tab-content {
   padding: 0 6px;
@@ -689,11 +697,11 @@ input#issue_subject, input#document_title { width: 99%; }
 select#issue_done_ratio { width: 95px; }
 
 ul.projects {margin:0; padding-left:1em;}
-ul.projects ul {padding-left:1.6em;}
+ul.projects ul.projects {padding-left:1.6em;}
 ul.projects.root {margin:0; padding:0;}
 ul.projects li.root, ul.projects li.child {list-style-type:none;}
 ul.projects li.root div.archived, ul.projects li.child div.archived {color: #aaa;}
-ul.projects div.description li {list-style-type:initial;}
+ul.projects div.description ul li {list-style-type:initial;}
 
 #projects-index {
   column-count: auto;
@@ -980,12 +988,6 @@ input.string_cf, input.link_cf {width:95%;}
 select.bool_cf {width:auto !important;}
 
 #tab-content-modules fieldset p {margin:3px 0 4px 0;}
-
-#tab-content-users .splitcontentleft {width: 64%;}
-#tab-content-users .splitcontentright {width: 34%;}
-#tab-content-users fieldset {padding:1em; margin-bottom: 1em;}
-#tab-content-users fieldset label {display: block;}
-#tab-content-users #principals {max-height: 400px; overflow: auto;}
 
 #users_for_watcher {height: 200px; overflow:auto;}
 #users_for_watcher label {display: block;}
