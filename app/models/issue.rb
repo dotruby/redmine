@@ -490,7 +490,6 @@ class Issue < ActiveRecord::Base
     'start_date',
     'due_date',
     'done_ratio',
-    'estimated_hours',
     'custom_field_values',
     'custom_fields',
     'lock_version',
@@ -519,6 +518,9 @@ class Issue < ActiveRecord::Base
   safe_attributes(
     'deleted_attachment_ids',
     :if => lambda {|issue, user| issue.attachments_deletable?(user)})
+
+  safe_attributes 'estimated_hours',
+    :if => lambda {|issue, user| user.allowed_to?(:view_estimated_hours, issue.project)}
 
   def safe_attribute_names(user=nil)
     names = super

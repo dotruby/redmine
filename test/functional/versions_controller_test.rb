@@ -165,7 +165,22 @@ class VersionsControllerTest < Redmine::ControllerTest
       assert_select 'a', :text => '1 open'
     end
 
-    assert_select '.time-tracking td.total-hours a:first-child', :text => '2:00 hours'
+    assert_select '.time-tracking tr:first-child' do
+      assert_select 'th', :text => 'Estimated time'
+      assert_select 'td.total-hours a', :text => '2.00 hours'
+    end
+
+    Role.non_member.remove_permission! :view_estimated_hours
+
+    get :show, :params => {:id => 4}
+    assert_response :success
+
+    assert_select 'p.progress-info' do
+      assert_select 'a', :text => '1 issue'
+      assert_select 'a', :text => '1 open'
+    end
+
+    assert_select '.time-tracking th', :text => 'Estimated time', :count => 0
   end
 
   def test_show_should_link_to_spent_time_on_version

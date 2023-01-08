@@ -837,6 +837,29 @@ class ProjectsControllerTest < Redmine::ControllerTest
     end
   end
 
+  def test_show_by_non_admin_user_with_view_estimated_hours_permission_should_show_estimated_time
+    @request.session[:user_id] = 2 # manager
+    get :show, :params => {
+        :id => 'ecookbook'
+      }
+
+    assert_select 'div.spent_time.box>ul' do
+      assert_select '>li', :text => 'Estimated time: 203.50 hours'
+    end
+  end
+
+  def test_show_by_non_admin_user_without_view_estimated_hours_permission_should_not_show_estimated_time
+    Role.find_by_name('Manager').remove_permission! :view_estimated_hours
+    @request.session[:user_id] = 2 # manager
+    get :show, :params => {
+        :id => 'ecookbook'
+      }
+
+    assert_select 'div.spent_time.box>ul' do
+      assert_select '>li', :text => 'Estimated time: 203.50 hours', :count => 0
+    end
+  end
+
   def test_settings
     @request.session[:user_id] = 2 # manager
     get(:settings, :params => {:id => 1})

@@ -43,6 +43,11 @@ class MailHandlerTest < ActiveSupport::TestCase
   end
 
   def test_add_issue_with_specific_overrides
+    project = Project.find_by_name('OnlineStore')
+    project.enabled_module_names += [:time_tracking]
+    project.save!
+
+
     issue =
       submit_email(
         'ticket_on_given_project.eml',
@@ -74,6 +79,10 @@ class MailHandlerTest < ActiveSupport::TestCase
   end
 
   def test_add_issue_with_all_overrides
+    project = Project.find_by_name('OnlineStore')
+    project.enabled_module_names += [:time_tracking]
+    project.save!
+
     issue = submit_email('ticket_on_given_project.eml', :allow_override => 'all')
     assert issue.is_a?(Issue)
     assert !issue.new_record?

@@ -47,19 +47,6 @@ class IssueQuery < Query
                     :groupable => true),
     QueryColumn.new(:start_date, :sortable => "#{Issue.table_name}.start_date", :groupable => true),
     QueryColumn.new(:due_date, :sortable => "#{Issue.table_name}.due_date", :groupable => true),
-    QueryColumn.new(:estimated_hours, :sortable => "#{Issue.table_name}.estimated_hours",
-                    :totalable => true),
-    QueryColumn.new(
-      :total_estimated_hours,
-      :sortable =>
-        lambda do
-          "COALESCE((SELECT SUM(estimated_hours) FROM #{Issue.table_name} subtasks" \
-          " WHERE #{Issue.visible_condition(User.current).gsub(/\bissues\b/, 'subtasks')}" \
-          " AND subtasks.root_id = #{Issue.table_name}.root_id" \
-          " AND subtasks.lft >= #{Issue.table_name}.lft" \
-          " AND subtasks.rgt <= #{Issue.table_name}.rgt), 0)"
-        end,
-      :default_order => 'desc'),
     QueryColumn.new(:done_ratio, :sortable => "#{Issue.table_name}.done_ratio", :groupable => true),
     TimestampQueryColumn.new(:created_on, :sortable => "#{Issue.table_name}.created_on",
                              :default_order => 'desc', :groupable => true),
@@ -205,10 +192,9 @@ class IssueQuery < Query
     add_available_filter "closed_on", :type => :date_past
     add_available_filter "start_date", :type => :date
     add_available_filter "due_date", :type => :date
-    add_available_filter "estimated_hours", :type => :float
 
-    if User.current.allowed_to?(:view_time_entries, project, :global => true)
-      add_available_filter "spent_time", :type => :float, :label => :label_spent_time
+    if User.current.allowed_to?(:view_estimated_hours, nil, :global => true)
+      add_available_filter "estimated_hours", :type => :float
     end
 
     add_available_filter "done_ratio", :type => :integer
@@ -283,9 +269,28 @@ class IssueQuery < Query
     @available_columns = self.class.available_columns.dup
     @available_columns += issue_custom_fields.visible.collect {|cf| QueryCustomFieldColumn.new(cf)}
 
+    if User.current.allowed_to?(:view_estimated_hours, project, :global => true)
+      # insert the columns after due_date or at the end
+      index = @available_columns.rindex {|column| column.name == :due_date}
+      index = (index ? index + 1 : -1)
+
+      @available_columns.insert index, QueryColumn.new(:estimated_hours,
+        :sortable => "#{Issue.table_name}.estimated_hours",
+        :totalable => true
+      )
+      index = (index.negative? ? index : index + 1)
+      @available_columns.insert index, QueryColumn.new(:total_estimated_hours,
+        :sortable => -> {
+                       "COALESCE((SELECT SUM(estimated_hours) FROM #{Issue.table_name} subtasks" +
+          " WHERE #{Issue.visible_condition(User.current).gsub(/\bissues\b/, 'subtasks')} AND subtasks.root_id = #{Issue.table_name}.root_id AND subtasks.lft >= #{Issue.table_name}.lft AND subtasks.rgt <= #{Issue.table_name}.rgt), 0)"
+                     },
+        :default_order => 'desc'
+      )
+    end
+
     if User.current.allowed_to?(:view_time_entries, project, :global => true)
-      # insert the columns after total_estimated_hours or at the end
-      index = @available_columns.find_index {|column| column.name == :total_estimated_hours}
+      # insert the columns after total_estimated_hours or the columns after due_date or at the end
+      index = @available_columns.rindex {|column| column.name == :total_estimated_hours || column.name == :due_date }
       index = (index ? index + 1 : -1)
 
       subselect = "SELECT SUM(hours) FROM #{TimeEntry.table_name}" +
@@ -307,8 +312,9 @@ class IssueQuery < Query
         " WHERE (#{TimeEntry.visible_condition(User.current)})" +
         " AND subtasks.root_id = #{Issue.table_name}.root_id AND subtasks.lft >= #{Issue.table_name}.lft AND subtasks.rgt <= #{Issue.table_name}.rgt"
 
+      index = (index.negative? ? index : index + 1)
       @available_columns.insert(
-        index + 1,
+        index,
         QueryColumn.new(:total_spent_hours,
                         :sortable => "COALESCE((#{subselect}), 0)",
                         :default_order => 'desc',

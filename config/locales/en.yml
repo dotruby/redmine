@@ -550,6 +550,7 @@ en:
   permission_delete_issue_watchers: Delete watchers
   permission_log_time: Log spent time
   permission_view_time_entries: View spent time
+  permission_view_estimated_hours: View estimated time
   permission_edit_time_entries: Edit time logs
   permission_edit_own_time_entries: Edit own time logs
   permission_view_news: View news

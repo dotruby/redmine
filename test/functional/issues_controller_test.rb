@@ -1607,6 +1607,15 @@ class IssuesControllerTest < Redmine::ControllerTest
     assert_select 'table.issues td.total_estimated_hours'
   end
 
+  def test_index_should_not_show_estimated_hours_column_without_permission
+    Role.anonymous.remove_permission! :view_estimated_hours
+    get :index, :params => {
+        :set_filter => 1,
+        :c => %w(subject estimated_hours)
+      }
+    assert_select 'td.estimated_hours', 0
+  end
+
   def test_index_should_not_show_spent_hours_column_without_permission
     Role.anonymous.remove_permission! :view_time_entries
     get(
